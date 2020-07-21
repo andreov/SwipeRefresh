@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">SimpleAdapter</string>
+    <string name="app_name">AdapterSharedPref</string>
     <string name="large_text">
-        "Material is the metaphor.\n\n"
+        "Material 33333333 is the metaphor.\n\n"
 
         "A material metaphor is the unifying theory of a rationalized space and a system of motion."
         "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
