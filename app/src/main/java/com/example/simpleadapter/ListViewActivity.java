@@ -2,6 +2,7 @@ package com.example.simpleadapter;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Math.E;
+
 public class ListViewActivity extends AppCompatActivity {
 
     private static final String KEY1="key1";
@@ -31,6 +34,8 @@ public class ListViewActivity extends AppCompatActivity {
     private static String LIST_TEXT = "list_text";
     private String noteTxt;
     private List<Map<String,String>>result=new ArrayList<>();
+    private ArrayList<Integer>indexDel=new ArrayList<>();
+    private static final String KEY_STATE = "keyOnState";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,18 +48,23 @@ public class ListViewActivity extends AppCompatActivity {
         values = prepareContent();
         final ListView list = findViewById(R.id.list);
         data();
+
         adapter=createAdapter();
         list.setAdapter(adapter);
+
 
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
                 result.remove(position);
+                indexDel.add(position);
                 adapter.notifyDataSetChanged();
 
             }
 
         });
+
+
 
         final SwipeRefreshLayout refreshLayout=findViewById(R.id.swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -69,13 +79,38 @@ public class ListViewActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected  void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        Log.d("Lifecycle", "onSaveInstanceState");
+        outState.putIntegerArrayList(KEY_STATE,indexDel);
+        //saveString();
+        Toast.makeText(ListViewActivity.this, indexDel.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected  void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d("Lifecycle", "onRestoreInstanceState");
+        if(savedInstanceState!=null) {
+            ArrayList<Integer> restore = new ArrayList(savedInstanceState.getIntegerArrayList(KEY_STATE));
+            for(int i=0;i<restore.size();i++){
+                int x = restore.get(i).intValue();
+                result.remove(x);
+                //adapter.notifyDataSetChanged();
+            }
+        adapter.notifyDataSetChanged();
+        }else return;
+
+    }
+
     private void saveString(){
         SharedPreferences.Editor myEditor = myListSharedPref.edit();
         //noteTxt = myListSharedPref.getString(LIST_TEXT, "");
         //if(noteTxt.equals("")){
         myEditor.putString(LIST_TEXT, getString(R.string.large_text));
         myEditor.apply();
-        Toast.makeText(ListViewActivity.this, "Данные строки сохранены", Toast.LENGTH_LONG).show();
+        //Toast.makeText(ListViewActivity.this, "Данные строки сохранены", Toast.LENGTH_LONG).show();
         //}
     }
 
@@ -95,6 +130,7 @@ public class ListViewActivity extends AppCompatActivity {
 
     }
     private SimpleAdapter createAdapter(){
+        //saveString();
         return new SimpleAdapter(this,result,R.layout.list_item,new String[]{KEY1,KEY2},new int[]{R.id.text1,R.id.text2});
     }
 }
